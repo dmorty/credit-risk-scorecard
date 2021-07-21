@@ -1,0 +1,90 @@
+---
+title: "Demonstration of how to build a credit risk scorecard in R"
+author: "David Mortimer"
+date: "21 July 2021"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    self_contained: yes
+    css: corp-styles.css
+    highlight: pygments
+---
+
+
+<div class="watermark">DRAFT</div>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE, eval = TRUE)
+```
+
+# Executive Summary
+
+R Markdown is a great way to turn your analysis into a portable, reproducible document - such as pdf or html. This document demonstrates how to incorporate Healths corporate style guide into Rmarkdown documents.
+
+```{r results = 'asis', message=F, warning=F}
+#library(openxlsx)
+library(tidyverse)
+library(stringr)
+library(scales)    # to show scale in percent
+library(ggseas)    # for seasonal adjustment on the fly
+library(forcats)   # for munging factors
+library(extrafont) # in case running on windows
+library(stringi)   # for generating pseudo lating lorem ipsum text
+library(here)
+library(lubridate)
+library(zoo)
+library(scales)
+library(skimr)
+library(scorecard)
+library(knitr)
+
+source(here('corp-palette.R'))
+#cat(stri_rand_lipsum(1))
+
+hmeq <- read_csv(here("data/hmeq.csv"))
+```
+## Data Description
+
+The classic HMEQ dataset - containing data relating to Home Equity Loan performance.
+
+## Data profiling
+
+The skimr package provides a nice way to quickly profile the input training dataset.
+
+```{r pressure, echo=FALSE}
+skim(hmeq)
+```
+
+## Univariate Analysis
+
+The purpose of univariate analysis is to:
+
+1. Examine the relationship of each individual variable to the target (ie. loan default)
+2. Evaluate the input variables for candidates to use in model training
+3. Screen out un-predictive variables
+
+The univariate analysis is performed by first binning each variable into discrete categories - sometimes called discretization in machine learning.
+
+Each variable is binned into homogeneous groups that optimise the relationship to the target.
+
+```{r binning, echo=FALSE}
+bins <- woebin(hmeq , "BAD")
+
+iv <- iv(hmeq , "BAD")
+
+```
+
+**Information Value (IV) summary**
+
+```{r print_tab, echo=FALSE}
+
+kable(iv)
+```
+
+## Variable Selection/Screening
+
+
+## Scorecard Fitting/Scaling
